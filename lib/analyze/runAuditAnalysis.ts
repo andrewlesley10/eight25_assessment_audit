@@ -19,12 +19,20 @@ function extractJsonObject(raw: string) {
 export async function runAuditAnalysis(metrics: ExtractedMetrics) {
   const { userPrompt, promptConstruction } = buildAuditPrompt(metrics);
   const timestamp = new Date().toISOString();
+  const baseUrl = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
+  const apiKey = process.env.OLLAMA_API_KEY;
+  const headers: HeadersInit = {
+    "Content-Type": "application/json"
+  };
 
-  const response = await fetch(`${process.env.OLLAMA_BASE_URL ?? "http://localhost:11434"}/api/generate`, {
+  // Direct ollama.com API access requires a bearer token.
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
+
+  const response = await fetch(`${baseUrl}/api/generate`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers,
     body: JSON.stringify({
       model: process.env.OLLAMA_MODEL ?? "qwen2.5:7b",
       system: systemPrompt,
