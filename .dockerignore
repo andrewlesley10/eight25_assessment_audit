@@ -1,0 +1,8 @@
+node_modules
+.next
+frontend
+.venv
+prompt_logs
+prompt-logs
+coverage
+npm-debug.log

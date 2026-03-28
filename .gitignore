@@ -1,0 +1,9 @@
+.env
+.next/
+node_modules/
+coverage/
+dist/
+*.log
+.venv/
+prompt-logs/*.json
+prompt-logs/*.md

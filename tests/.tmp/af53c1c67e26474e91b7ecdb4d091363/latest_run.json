@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-03-28T05:25:35Z",
+  "url": "https://example.com",
+  "model": "qwen2.5:7b",
+  "system_prompt": "system",
+  "user_prompt": "user",
+  "repair_prompt": "repair",
+  "structured_metrics_input": {
+    "word_count": 10
+  },
+  "initial_raw_ollama_response": "{bad json",
+  "final_raw_ollama_response": "{\"ok\": true}",
+  "parsed_final_json": {
+    "ok": true
+  },
+  "error": null
+}
