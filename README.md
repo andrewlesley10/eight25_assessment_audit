@@ -123,9 +123,9 @@ website-audit-tool/
 ## Environment Variables
 
 ```env
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=qwen2.5:7b
-OLLAMA_API_KEY=
+OLLAMA_BASE_URL=https://ollama.com
+OLLAMA_MODEL=qwen3:8b
+OLLAMA_API_KEY=your_ollama_cloud_api_key
 NEXT_PUBLIC_APP_NAME=Website Audit Tool
 REQUEST_TIMEOUT_MS=15000
 OLLAMA_TIMEOUT_MS=90000
@@ -141,53 +141,19 @@ npm run dev
 
 Then open `http://localhost:3000`.
 
-## Ollama Setup
-
-```bash
-ollama pull qwen2.5:7b
-ollama serve
-```
-
-If you want a lighter model:
-
-```bash
-ollama pull qwen3:4b
-```
-
-Then set `OLLAMA_MODEL=qwen3:4b`.
-
 ## Ollama Cloud
 
-This app supports two Ollama Cloud patterns:
+This implementation is configured for direct Ollama Cloud access only.
 
-1. Local Ollama with cloud models
-
-Use local Ollama as usual, sign in once, and point the app at your local Ollama server:
-
-```bash
-ollama signin
-ollama pull gpt-oss:120b-cloud
-ollama serve
-```
-
-Then use:
-
-```env
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=gpt-oss:120b-cloud
-```
-
-2. Direct ollama.com API access
-
-For deployments such as Vercel, you can point the app straight at Ollama Cloud:
+Use:
 
 ```env
 OLLAMA_BASE_URL=https://ollama.com
-OLLAMA_MODEL=gpt-oss:120b
+OLLAMA_MODEL=qwen3:8b
 OLLAMA_API_KEY=your_api_key
 ```
 
-The app will automatically send the bearer token when `OLLAMA_API_KEY` is present.
+The app sends the bearer token automatically and will fail fast with a clear error if `OLLAMA_API_KEY` is missing.
 
 ## Testing
 
