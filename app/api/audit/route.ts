@@ -26,7 +26,12 @@ export async function POST(request: NextRequest) {
       const analysis = await runAuditAnalysis(metrics);
       insights = analysis.insights;
       trace = analysis.trace;
-      await writePromptLog(trace);
+
+      try {
+        await writePromptLog(trace);
+      } catch {
+        warnings.push("Prompt log persistence was skipped in this environment, but the in-app trace is still available.");
+      }
     } catch (error) {
       if (error instanceof AuditError) {
         warnings.push(error.message);

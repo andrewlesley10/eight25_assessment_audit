@@ -3,10 +3,22 @@ import { join } from "node:path";
 import { safeDomainForFilename } from "@/lib/utils/url";
 import type { PromptTrace } from "@/types/audit";
 
+function resolvePromptLogDirectory() {
+  if (process.env.PROMPT_LOG_DIR) {
+    return process.env.PROMPT_LOG_DIR;
+  }
+
+  if (process.env.VERCEL) {
+    return "/tmp/prompt-logs";
+  }
+
+  return join(process.cwd(), "prompt-logs");
+}
+
 export async function writePromptLog(trace: PromptTrace) {
   const stamp = trace.timestamp.replace(/[:]/g, "-");
   const slug = safeDomainForFilename(trace.url);
-  const directory = join(process.cwd(), "prompt-logs");
+  const directory = resolvePromptLogDirectory();
   const jsonPath = join(directory, `${stamp}_${slug}.json`);
   const markdownPath = join(directory, `${stamp}_${slug}.md`);
 

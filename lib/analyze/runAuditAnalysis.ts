@@ -137,7 +137,16 @@ export async function runAuditAnalysis(metrics: ExtractedMetrics) {
     throw new AuditError("Ollama returned an empty response.", "AI_FAILED");
   }
 
-  const parsedOutput = aiAuditSchema.parse(extractJsonObject(rawModelOutput));
+  let parsedOutput;
+
+  try {
+    parsedOutput = aiAuditSchema.parse(extractJsonObject(rawModelOutput));
+  } catch {
+    throw new AuditError(
+      "Ollama returned a response that did not match the expected JSON audit schema.",
+      "AI_FAILED"
+    );
+  }
 
   const trace: PromptTrace = {
     timestamp,

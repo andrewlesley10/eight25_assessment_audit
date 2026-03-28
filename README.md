@@ -88,6 +88,8 @@ Each audit writes a structured trace to `prompt-logs/` including:
 
 The UI also exposes these traces through the trace panel.
 
+On Vercel, prompt-log files are written to a temporary runtime directory when available. The in-app trace panel remains the primary production-facing transparency surface, because serverless filesystem writes are not durable between invocations.
+
 ## Folder Structure
 
 ```text
@@ -129,6 +131,7 @@ OLLAMA_API_KEY=your_ollama_cloud_api_key
 NEXT_PUBLIC_APP_NAME=Website Audit Tool
 REQUEST_TIMEOUT_MS=15000
 OLLAMA_TIMEOUT_MS=90000
+PROMPT_LOG_DIR=
 ```
 
 ## Run Locally
