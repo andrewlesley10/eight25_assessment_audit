@@ -38,14 +38,14 @@ export async function POST(request: NextRequest) {
         trace = {
           timestamp: new Date().toISOString(),
           url: metrics.finalUrl,
-          systemPrompt: "",
-          userPrompt: "",
+          systemPrompt: error.trace?.systemPrompt ?? "",
+          userPrompt: error.trace?.userPrompt ?? "",
           promptConstruction: {
-            builder: "buildAuditPrompt(metrics)",
-            sections: []
+            builder: error.trace?.promptConstruction?.builder ?? "buildAuditPrompt(metrics)",
+            sections: error.trace?.promptConstruction?.sections ?? []
           },
           structuredInput: metrics,
-          rawModelOutput: "",
+          rawModelOutput: error.trace?.rawModelOutput ?? "",
           parsedOutput: null
         };
       } else {

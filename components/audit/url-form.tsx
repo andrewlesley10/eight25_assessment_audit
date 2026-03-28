@@ -130,7 +130,7 @@ export function UrlForm() {
                   Analyze URL
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button type="button" variant="ghost" onClick={() => setUrl("https://example.com")}>
+                <Button type="button" variant="ghost" onClick={() => setUrl("https://www.daraz.lk/")}>
                   Use sample URL
                 </Button>
               </div>

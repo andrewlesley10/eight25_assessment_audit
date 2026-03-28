@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { AuditError } from "@/lib/utils/errors";
 
 vi.mock("@/lib/fetch/fetchPage", () => ({
   fetchPage: vi.fn().mockResolvedValue({
@@ -71,5 +72,39 @@ describe("POST /api/audit", () => {
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
     expect(json.data.metrics.finalUrl).toBe("https://example.com");
+  });
+
+  it("preserves raw model output when AI parsing fails", async () => {
+    const { runAuditAnalysis } = await import("@/lib/analyze/runAuditAnalysis");
+
+    vi.mocked(runAuditAnalysis).mockRejectedValueOnce(
+      new AuditError("Schema mismatch", "AI_FAILED", {
+        systemPrompt: "system prompt",
+        userPrompt: "user prompt",
+        promptConstruction: {
+          builder: "buildAuditPrompt(metrics)",
+          sections: ["Task framing and grounding rules"]
+        },
+        rawModelOutput: "Here is my answer:\n{\"not\":\"valid\"}"
+      })
+    );
+
+    const request = new Request("http://localhost/api/audit", {
+      method: "POST",
+      body: JSON.stringify({ url: "example.com" }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    const response = await POST(request as never);
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(json.data.warnings).toContain("Schema mismatch");
+    expect(json.data.trace.rawModelOutput).toBe("Here is my answer:\n{\"not\":\"valid\"}");
+    expect(json.data.trace.systemPrompt).toBe("system prompt");
+    expect(json.data.trace.userPrompt).toBe("user prompt");
   });
 });

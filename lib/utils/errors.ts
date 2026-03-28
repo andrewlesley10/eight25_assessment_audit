@@ -1,3 +1,5 @@
+import type { PromptTrace } from "@/types/audit";
+
 export class AuditError extends Error {
   constructor(
     message: string,
@@ -6,7 +8,8 @@ export class AuditError extends Error {
       | "FETCH_FAILED"
       | "NON_HTML"
       | "EMPTY_CONTENT"
-      | "AI_FAILED" = "FETCH_FAILED"
+      | "AI_FAILED" = "FETCH_FAILED",
+    public readonly trace?: Partial<PromptTrace>
   ) {
     super(message);
   }

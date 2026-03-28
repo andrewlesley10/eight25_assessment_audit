@@ -88,9 +88,19 @@ export async function runAuditAnalysis(metrics: ExtractedMetrics) {
   const timestamp = new Date().toISOString();
   const baseUrl = normalizeOllamaBaseUrl(process.env.OLLAMA_BASE_URL ?? "https://ollama.com");
   const apiKey = process.env.OLLAMA_API_KEY;
+  const buildTrace = (rawModelOutput: string, parsedOutput: PromptTrace["parsedOutput"] = null): PromptTrace => ({
+    timestamp,
+    url: metrics.finalUrl,
+    systemPrompt,
+    userPrompt,
+    promptConstruction,
+    structuredInput: metrics,
+    rawModelOutput,
+    parsedOutput
+  });
 
   if (!apiKey) {
-    throw new AuditError("OLLAMA_API_KEY is required for Ollama Cloud.", "AI_FAILED");
+    throw new AuditError("OLLAMA_API_KEY is required for Ollama Cloud.", "AI_FAILED", buildTrace(""));
   }
 
   const headers: HeadersInit = {
@@ -113,7 +123,7 @@ export async function runAuditAnalysis(metrics: ExtractedMetrics) {
     }),
     signal: AbortSignal.timeout(Number(process.env.OLLAMA_TIMEOUT_MS ?? 90_000))
   }).catch(() => {
-    throw new AuditError("The Ollama request failed.", "AI_FAILED");
+    throw new AuditError("The Ollama request failed.", "AI_FAILED", buildTrace(""));
   });
 
   if (!response.ok) {
@@ -123,18 +133,19 @@ export async function runAuditAnalysis(metrics: ExtractedMetrics) {
     if (response.status === 404) {
       throw new AuditError(
         `Ollama returned HTTP 404. Verify OLLAMA_BASE_URL (${baseUrl}) and OLLAMA_MODEL (${model}).${detailSuffix}`,
-        "AI_FAILED"
+        "AI_FAILED",
+        buildTrace(details)
       );
     }
 
-    throw new AuditError(`Ollama returned HTTP ${response.status}.${detailSuffix}`, "AI_FAILED");
+    throw new AuditError(`Ollama returned HTTP ${response.status}.${detailSuffix}`, "AI_FAILED", buildTrace(details));
   }
 
   const envelope = (await response.json()) as { response?: string };
-  const rawModelOutput = envelope.response?.trim() ?? "";
+  const rawModelOutput = envelope.response ?? "";
 
-  if (!rawModelOutput) {
-    throw new AuditError("Ollama returned an empty response.", "AI_FAILED");
+  if (!rawModelOutput.trim()) {
+    throw new AuditError("Ollama returned an empty response.", "AI_FAILED", buildTrace(rawModelOutput));
   }
 
   let parsedOutput;
@@ -144,20 +155,12 @@ export async function runAuditAnalysis(metrics: ExtractedMetrics) {
   } catch {
     throw new AuditError(
       "Ollama returned a response that did not match the expected JSON audit schema.",
-      "AI_FAILED"
+      "AI_FAILED",
+      buildTrace(rawModelOutput)
     );
   }
 
-  const trace: PromptTrace = {
-    timestamp,
-    url: metrics.finalUrl,
-    systemPrompt,
-    userPrompt,
-    promptConstruction,
-    structuredInput: metrics,
-    rawModelOutput,
-    parsedOutput
-  };
+  const trace = buildTrace(rawModelOutput, parsedOutput);
 
   return {
     insights: parsedOutput,
